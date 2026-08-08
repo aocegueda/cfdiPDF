@@ -54,6 +54,11 @@ public class XmlToCfdiDataService : IXmlToCfdiDataService
         // Generar importe con letra automáticamente
         dto.ImporteConLetra = NumeroALetrasConverter.Convertir(dto.Total, dto.Moneda);
 
+        // 0. INFORMACIÓN GLOBAL (venta al público en general -- Factura Global) --
+        // el DTO y el template ya tenían los campos/la sección lista para esto, pero
+        // nunca se leía el nodo del XML, así que nunca se veía nada en el PDF.
+        ParsearInformacionGlobal(root, dto);
+
         // 1. EMISOR Y RECEPTOR
         ParsearEmisorYReceptor(root, dto);
 
@@ -87,6 +92,38 @@ public class XmlToCfdiDataService : IXmlToCfdiDataService
     }
 
     #region Parsers Secundarios
+
+    private static void ParsearInformacionGlobal(XElement root, CfdiDataDto dto)
+    {
+        var infoGlobal = root.Element(Cfdi + "InformacionGlobal");
+        if (infoGlobal == null) return;
+
+        dto.PeriodicidadGlobal = GetAttr(infoGlobal, "Periodicidad");
+        dto.PeriodicidadGlobalNombre = ObtenerDescripcionPeriodicidad(dto.PeriodicidadGlobal);
+        dto.MesesGlobal = GetAttr(infoGlobal, "Meses");
+        dto.MesesGlobalNombre = ObtenerDescripcionMeses(dto.MesesGlobal);
+        dto.AnioGlobal = GetAttr(infoGlobal, "Año");
+    }
+
+    private static string? ObtenerDescripcionPeriodicidad(string clave) => clave switch
+    {
+        "01" => "Diario",
+        "02" => "Semanal",
+        "03" => "Quincenal",
+        "04" => "Mensual",
+        "05" => "Bimestral",
+        _ => null
+    };
+
+    private static string? ObtenerDescripcionMeses(string clave) => clave switch
+    {
+        "01" => "Enero", "02" => "Febrero", "03" => "Marzo", "04" => "Abril",
+        "05" => "Mayo", "06" => "Junio", "07" => "Julio", "08" => "Agosto",
+        "09" => "Septiembre", "10" => "Octubre", "11" => "Noviembre", "12" => "Diciembre",
+        "13" => "Enero-Febrero", "14" => "Marzo-Abril", "15" => "Mayo-Junio",
+        "16" => "Julio-Agosto", "17" => "Septiembre-Octubre", "18" => "Noviembre-Diciembre",
+        _ => null
+    };
 
     private static void ParsearEmisorYReceptor(XElement root, CfdiDataDto dto)
     {

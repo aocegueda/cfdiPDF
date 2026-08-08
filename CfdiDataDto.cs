@@ -58,7 +58,9 @@ public class CfdiDataDto
 
     // Datos Factura Global (Si aplica para Venta Mostrador en Papelería)
     public string? PeriodicidadGlobal { get; set; }
+    public string? PeriodicidadGlobalNombre { get; set; } // [AGREGADO]: descripción del catálogo SAT (c_Periodicidad)
     public string? MesesGlobal { get; set; }
+    public string? MesesGlobalNombre { get; set; } // [AGREGADO]: descripción del catálogo SAT (c_Meses)
     public string? AnioGlobal { get; set; }
 
     // ==========================================

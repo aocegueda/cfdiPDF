@@ -25,7 +25,9 @@ public class FacturaIngresoTemplate : IDocument
             page.Margin(25);
             page.DefaultTextStyle(CfdiPdfStyles.BodyStyle);
 
-            string titulo = _data.TipoDeComprobante == "E" ? "NOTA DE CRÉDITO" : "FACTURA ELECTRÓNICA";
+            string titulo = _data.TipoDeComprobante == "E" ? "NOTA DE CRÉDITO"
+                : !string.IsNullOrEmpty(_data.PeriodicidadGlobal) ? "FACTURA GLOBAL"
+                : "FACTURA ELECTRÓNICA";
             page.Header().Component(new CfdiHeaderComponent(_data, titulo));
             page.Content().Element(ComposeContent);
             page.Footer().Component(new CfdiTimbreSatComponent(_data));
@@ -54,13 +56,15 @@ public class FacturaIngresoTemplate : IDocument
                 });
             });
 
-            // Informacion Factura Global (Mostrador)
+            // Informacion Factura Global (Mostrador) -- título ya avisa "FACTURA
+            // GLOBAL" arriba (CfdiHeaderComponent); aquí va el detalle del periodo.
             if (!string.IsNullOrEmpty(_data.PeriodicidadGlobal))
             {
                 col.Item().PaddingTop(4).Border(1).BorderColor(Colors.Orange.Medium)
                    .Background(Colors.Orange.Lighten5).Padding(4)
-                   .Text($"Factura Global -> Periodicidad: {_data.PeriodicidadGlobal} | Meses: {_data.MesesGlobal} | Año: {_data.AnioGlobal}")
-                   .Bold().FontSize(7);
+                   .Text($"Comprobante Global -- Periodicidad: {CfdiDataDto.ClaveConNombre(_data.PeriodicidadGlobal!, _data.PeriodicidadGlobalNombre)} | " +
+                         $"Mes(es): {CfdiDataDto.ClaveConNombre(_data.MesesGlobal ?? "", _data.MesesGlobalNombre)} | Año: {_data.AnioGlobal}")
+                   .Bold().FontSize(8);
             }
 
             col.Item().PaddingVertical(6);
